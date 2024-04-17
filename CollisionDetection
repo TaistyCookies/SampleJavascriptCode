@@ -3,9 +3,11 @@
 const GRID_SIZE = 50; // Size of each grid cell
 const PLAYER_SIZE = 40; // Size of the player square
 const ENEMY_SIZE = 40; // Size of the enemy square
+const StartX = -100; // Start X location 
+const StartY = 0; // STar Y location 
 
 //Variable
-var Collision = false
+var NotColliding = true
 
 // Canvas setup
 const canvas = document.getElementById('gameCanvas');
@@ -55,13 +57,46 @@ function update() {
     // Check collision between player and enemy
     if (checkCollision(player, SetObject)) {
         console.log('Collision detected!');
-            Collision = true
-
+            player.x = StartX
+            player.y = StartY
+            NotColliding = false
     }
     else   
-        Collision = false
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+        NotColliding = true
+
+
+// Mouse event listeners
+canvas.addEventListener('mousedown', (e) => {
+    const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+    const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+
+    // Check if mouse click is inside the player object
+    if (mouseX >= player.x && mouseX <= player.x + player.width &&
+        mouseY >= player.y && mouseY <= player.y + player.height) {
+        player.isDragging = true;
+    }
+});
+
+canvas.addEventListener('mousemove', (e) => {
+    if (player.isDragging && NotColliding) {
+        const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+        const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+
+        // Update player position to mouse coordinates
+        player.x = mouseX - player.width / 2; // Adjust to center the player horizontally
+        player.y = mouseY - player.height / 2; // Adjust to center the player vertically
+    }
+});
+
+canvas.addEventListener('mouseup', () => {
+    player.isDragging = false;
+});
+
+
+// Clear canvas
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    
 
     // Draw player and enemy
     drawObject(player);
@@ -74,25 +109,7 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// Handle player movement
-if (Collision = flase)
-    window.addEventListener('keydown', (e) => {
-        const speed = GRID_SIZE; // Move one grid cell at a time
-        switch (e.key) {
-            case 'ArrowUp':
-                player.y = snapToGrid(player.y - speed);
-                break;
-            case 'ArrowDown':
-                player.y = snapToGrid(player.y + speed);
-                break;
-            case 'ArrowLeft':
-                player.x = snapToGrid(player.x - speed);
-                break;
-            case 'ArrowRight':
-                player.x = snapToGrid(player.x + speed);
-                break;
-        }
-});
 
+        
 // Start the game loop
 gameLoop();
